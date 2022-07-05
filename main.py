@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
+DEEP_AI_API_KEY = os.getenv("DEEP_AI_API_KEY")
 CRAIYON_ENDPOINT = "https://backend.craiyon.com/generate"
 
 
@@ -115,6 +116,70 @@ async def generate_images(prompt: str) -> list[str]:
 async def decode_image_as_bytes(base64_str: str):
     return base64.decodebytes(bytes(base64_str, "utf-8"))
 
+async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_message.reply_to_message is None:
+        text = "Reply to an image, pelase."
+        await update.message.reply_text(text=text)
+        return
+    if update.effective_message.reply_to_message.photo is None:
+        text = "Reply to an image, pelase."
+        await update.message.reply_text(text=text)
+        return
+
+    photo_file_id = update.effective_message.reply_to_message.photo[-1].file_id
+    file_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={photo_file_id}"
+
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=file_url)
+            response_json = response.json()
+    except Exception as error:
+        raise error
+
+    file_download_url = f"https://api.telegram.org/file/bot{TOKEN}/{response_json['result']['file_path']}"
+
+    print(file_url)
+    print(response_json)
+    print(file_download_url)
+
+
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.deepai.org/api/waifu2x",
+                data={
+                    "image": file_download_url,
+                },
+                headers={"api-key": DEEP_AI_API_KEY},
+                timeout=None,
+            )
+            response_json = response.json()
+    except Exception as error:
+        raise error
+
+    upscaled_url = response.json()["output_url"]
+    print(upscaled_url)
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(upscaled_url, timeout=None)
+            
+    except Exception as error:
+        raise error
+    
+
+    response_bytes = await response.aread()
+
+    media_photos = []
+    media_photo = telegram.InputMediaPhoto(media=response_bytes)
+    media_photos.append(media_photo)
+
+    await update.message.reply_media_group(media=media_photos)
+
+
+
 
 def main() -> None:
     application = (
@@ -129,6 +194,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("generate", generate, block=False))
+    application.add_handler(CommandHandler("waifu2x", waifu2x, block=False))
 
     application.run_polling()
 
