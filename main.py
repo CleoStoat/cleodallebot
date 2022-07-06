@@ -104,7 +104,7 @@ async def generate_images(prompt: str) -> list[str]:
     data = {"prompt": prompt}
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             response = await client.post(url=CRAIYON_ENDPOINT, json=data, timeout=None)
             response_json = response.json()
     except Exception as error:
@@ -131,7 +131,7 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             response = await client.get(url=file_url)
             response_json = response.json()
     except Exception as error:
@@ -146,7 +146,7 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             response = await client.post(
                 "https://api.deepai.org/api/waifu2x",
                 data={
@@ -163,7 +163,7 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print(upscaled_url)
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             response = await client.get(upscaled_url, timeout=None)
             
     except Exception as error:
