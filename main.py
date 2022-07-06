@@ -116,6 +116,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             await update.message.reply_media_group(media=media_photos, write_timeout=120)
             retry = False
+            print(f"{command_text} - sent")
             return
         except Exception:
             seconds = random.randint(30, 60)
