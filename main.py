@@ -25,6 +25,7 @@ dotenv.load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
 DEEP_AI_API_KEY = os.getenv("DEEP_AI_API_KEY")
+# DEV_CHAT_ID = os.getenv("DEV_CHAT_ID")
 CRAIYON_ENDPOINT = "https://backend.craiyon.com/generate"
 
 
@@ -108,7 +109,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     while retry:
         try:
-    await update.message.reply_media_group(media=media_photos)
+            await update.message.reply_media_group(media=media_photos)
             retry = False
         except Exception:
             seconds = random.randint(30, 60)
@@ -133,6 +134,7 @@ async def generate_images(prompt: str) -> list[str]:
 async def decode_image_as_bytes(base64_str: str):
     return base64.decodebytes(bytes(base64_str, "utf-8"))
 
+
 async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_message.reply_to_message is None:
         text = "Reply to an image, pelase."
@@ -146,7 +148,6 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     photo_file_id = update.effective_message.reply_to_message.photo[-1].file_id
     file_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={photo_file_id}"
 
-    
     try:
         async with httpx.AsyncClient(timeout=None) as client:
             response = await client.get(url=file_url)
@@ -159,8 +160,6 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print(file_url)
     print(response_json)
     print(file_download_url)
-
-
 
     try:
         async with httpx.AsyncClient(timeout=None) as client:
@@ -182,10 +181,9 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         async with httpx.AsyncClient(timeout=None) as client:
             response = await client.get(upscaled_url, timeout=None)
-            
+
     except Exception as error:
         raise error
-    
 
     response_bytes = await response.aread()
 
@@ -194,8 +192,6 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     media_photos.append(media_photo)
 
     await update.message.reply_media_group(media=media_photos)
-
-
 
 
 def main() -> None:
