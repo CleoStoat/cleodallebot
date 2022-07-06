@@ -110,11 +110,11 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     while retry:
         if i >= 5:
             text = f"Timeout happened, couldn't send message after {i} attempts. Please try again."
-            await update.message.reply_text(text=text)
+            await update.message.reply_text(text=text, quote=True)
             return
 
         try:
-            await update.message.reply_media_group(media=media_photos, write_timeout=120)
+            await update.message.reply_media_group(media=media_photos, write_timeout=None, read_timeout=None, connect_timeout=None)
             retry = False
             print(f"{command_text} - sent")
             return
