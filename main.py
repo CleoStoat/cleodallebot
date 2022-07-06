@@ -1,12 +1,18 @@
+import asyncio
 import base64
 import datetime
+import html
+import json
 import logging
 import os
+import random
+import traceback
 
 import dotenv
 import httpx
 import telegram
 from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Enable logging
