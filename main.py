@@ -97,7 +97,18 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes)
         media_photos.append(media_photo)
 
+    retry = True
+    i = 1
+
+    while retry:
+        try:
     await update.message.reply_media_group(media=media_photos)
+            retry = False
+        except Exception:
+            seconds = random.randint(30, 60)
+            print(f"{command_text} - Timeout happened, retrying in {seconds}s... ({i} attempt)")
+            i += 1
+            await asyncio.sleep(seconds)
 
 
 async def generate_images(prompt: str) -> list[str]:
