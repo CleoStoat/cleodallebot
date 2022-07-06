@@ -108,9 +108,15 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     i = 1
 
     while retry:
+        if i >= 5:
+            text = f"Timeout happened, couldn't send message after {i} attempts. Please try again."
+            await update.message.reply_text(text=text)
+            return
+
         try:
-            await update.message.reply_media_group(media=media_photos)
+            await update.message.reply_media_group(media=media_photos, write_timeout=120)
             retry = False
+            return
         except Exception:
             seconds = random.randint(30, 60)
             print(f"{command_text} - Timeout happened, retrying in {seconds}s... ({i} attempt)")
