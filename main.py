@@ -1,18 +1,14 @@
 import asyncio
 import base64
 import datetime
-import html
-import json
 import logging
 import os
 import random
-import traceback
 
 import dotenv
 import httpx
 import telegram
 from telegram import Update
-from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Enable logging
@@ -114,13 +110,20 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             return
 
         try:
-            await update.message.reply_media_group(media=media_photos, write_timeout=None, read_timeout=None, connect_timeout=None)
+            await update.message.reply_media_group(
+                media=media_photos,
+                write_timeout=None,
+                read_timeout=None,
+                connect_timeout=None,
+            )
             retry = False
             print(f"{command_text} - sent")
             return
         except Exception:
             seconds = random.randint(30, 60)
-            print(f"{command_text} - Timeout happened, retrying in {seconds}s... ({i} attempt)")
+            print(
+                f"{command_text} - Timeout happened, retrying in {seconds}s... ({i} attempt)"
+            )
             i += 1
             await asyncio.sleep(seconds)
 
