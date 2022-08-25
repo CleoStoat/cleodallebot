@@ -47,42 +47,42 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     text = f'Generating:\n"{command_text}"\nPlease wait...'
 
-    if "requests" not in context.bot_data:
-        context.bot_data["requests"] = []
-    context.bot_data["requests"].append(datetime.datetime.now())
+    # if "requests" not in context.bot_data:
+    #     context.bot_data["requests"] = []
+    # context.bot_data["requests"].append(datetime.datetime.now())
 
-    all_requests: list[datetime.datetime] = context.bot_data["requests"]
+    # all_requests: list[datetime.datetime] = context.bot_data["requests"]
 
-    last_1min = len(
-        [
-            dt
-            for dt in all_requests
-            if dt > datetime.datetime.now() - datetime.timedelta(minutes=1)
-        ]
-    )
-    last_5min = len(
-        [
-            dt
-            for dt in all_requests
-            if dt > datetime.datetime.now() - datetime.timedelta(minutes=5)
-        ]
-    )
-    last_10min = len(
-        [
-            dt
-            for dt in all_requests
-            if dt > datetime.datetime.now() - datetime.timedelta(minutes=10)
-        ]
-    )
-    last_30min = len(
-        [
-            dt
-            for dt in all_requests
-            if dt > datetime.datetime.now() - datetime.timedelta(minutes=30)
-        ]
-    )
+    # last_1min = len(
+    #     [
+    #         dt
+    #         for dt in all_requests
+    #         if dt > datetime.datetime.now() - datetime.timedelta(minutes=1)
+    #     ]
+    # )
+    # last_5min = len(
+    #     [
+    #         dt
+    #         for dt in all_requests
+    #         if dt > datetime.datetime.now() - datetime.timedelta(minutes=5)
+    #     ]
+    # )
+    # last_10min = len(
+    #     [
+    #         dt
+    #         for dt in all_requests
+    #         if dt > datetime.datetime.now() - datetime.timedelta(minutes=10)
+    #     ]
+    # )
+    # last_30min = len(
+    #     [
+    #         dt
+    #         for dt in all_requests
+    #         if dt > datetime.datetime.now() - datetime.timedelta(minutes=30)
+    #     ]
+    # )
 
-    text += f"\n\nAmmount of requests in the past:\n1min: {last_1min}\n5min: {last_5min}\n10min: {last_10min}\n30min: {last_30min}"
+    # text += f"\n\nAmmount of requests in the past:\n1min: {last_1min}\n5min: {last_5min}\n10min: {last_10min}\n30min: {last_30min}"
 
     await update.message.reply_text(text=text)
 
@@ -95,9 +95,12 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     media_photos = []
-    for img_str in images:
+    for index, img_str in enumerate(images):
         decoded_image_bytes = await decode_image_as_bytes(img_str)
-        media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes)
+        if index == 0:
+            media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes, caption=command_text)
+        else:
+            media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes)
         media_photos.append(media_photo)
 
     retry = True
@@ -115,6 +118,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 write_timeout=None,
                 read_timeout=None,
                 connect_timeout=None,
+                
             )
             retry = False
             print(f"{command_text} - sent")
