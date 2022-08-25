@@ -1,6 +1,8 @@
+import random
 import asyncio
 import base64
 import datetime
+from fileinput import FileInput
 import logging
 import os
 import random
@@ -207,6 +209,23 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await update.message.reply_media_group(media=media_photos)
 
+async def thisfursonadoesnotexist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    seed = random.randint(0, 99999)
+    url = f"https://thisfursonadoesnotexist.com/v2/jpgs-2x/seed{str(seed).zfill(5)}.jpg"
+    await update.effective_message.reply_photo(photo=url,caption=f"seed: {seed}")
+
+
+async def thisfursonadoesnotexist_index(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not context.args:
+        await update.effective_message.reply_text("please provide a number bewtween 0 and 99999")
+        return
+    
+    try:
+        seed = context.args[0]
+        url = f"https://thisfursonadoesnotexist.com/v2/jpgs-2x/seed{str(seed).zfill(5)}.jpg"
+        await update.effective_message.reply_photo(photo=url,caption=f"seed: {seed}")
+    except Exception:
+        await update.effective_message.reply_text("Error. Incorrect number?")
 
 def main() -> None:
     application = (
@@ -222,6 +241,8 @@ def main() -> None:
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("generate", generate, block=False))
     application.add_handler(CommandHandler("waifu2x", waifu2x, block=False))
+    application.add_handler(CommandHandler("fursona", thisfursonadoesnotexist, block=False))
+    application.add_handler(CommandHandler("fursona_index", thisfursonadoesnotexist_index, block=False))
 
     application.run_polling()
 
