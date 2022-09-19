@@ -25,6 +25,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 DEEP_AI_API_KEY = os.getenv("DEEP_AI_API_KEY")
 # DEV_CHAT_ID = os.getenv("DEV_CHAT_ID")
 CRAIYON_ENDPOINT = "https://backend.craiyon.com/generate"
+MAGE_SPACE_API = "https://ai-api-3t3pkoefga-ue.a.run.app/api/v2/images/generate"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -33,6 +34,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Somebody please HELP ME!")
+
+
+async def gx(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not context.args:
+        text = "Command needs a prompt."
+        await update.message.reply_text(text=text)
+        return
+
+    command_text = " ".join(context.args)
+
+    print(update.message.chat.full_name)
+    print(update.message.from_user.full_name)
+    print(command_text)
+
+    text = f'Generating:\n"{command_text}"\nPlease wait...'
+    await update.message.reply_text(text=text)
+
+    data = {
+        "prompt": command_text,
+        "aspect_ratio": 1,
+        "num_inference_steps": 50,
+        "guidance_scale": 7.5,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=None) as client:
+            response = await client.post(url=MAGE_SPACE_API, json=data, timeout=None)
+            response_json = response.json()
+    except Exception as error:
+        text = "Error happened. I'm very sorry."
+        return
+
+    url_img = response_json["results"][0]["image_url"]
+
+    await update.message.reply_photo(photo=url_img, caption=command_text)
 
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -100,7 +136,9 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     for index, img_str in enumerate(images):
         decoded_image_bytes = await decode_image_as_bytes(img_str)
         if index == 0:
-            media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes, caption=command_text)
+            media_photo = telegram.InputMediaPhoto(
+                media=decoded_image_bytes, caption=command_text
+            )
         else:
             media_photo = telegram.InputMediaPhoto(media=decoded_image_bytes)
         media_photos.append(media_photo)
@@ -120,7 +158,6 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 write_timeout=None,
                 read_timeout=None,
                 connect_timeout=None,
-                
             )
             retry = False
             print(f"{command_text} - sent")
@@ -209,23 +246,31 @@ async def waifu2x(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await update.message.reply_media_group(media=media_photos)
 
-async def thisfursonadoesnotexist(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+async def thisfursonadoesnotexist(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     seed = random.randint(0, 99999)
     url = f"https://thisfursonadoesnotexist.com/v2/jpgs-2x/seed{str(seed).zfill(5)}.jpg"
-    await update.effective_message.reply_photo(photo=url,caption=f"seed: {seed}")
+    await update.effective_message.reply_photo(photo=url, caption=f"seed: {seed}")
 
 
-async def thisfursonadoesnotexist_index(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def thisfursonadoesnotexist_index(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     if not context.args:
-        await update.effective_message.reply_text("please provide a number bewtween 0 and 99999")
+        await update.effective_message.reply_text(
+            "please provide a number bewtween 0 and 99999"
+        )
         return
-    
+
     try:
         seed = context.args[0]
         url = f"https://thisfursonadoesnotexist.com/v2/jpgs-2x/seed{str(seed).zfill(5)}.jpg"
-        await update.effective_message.reply_photo(photo=url,caption=f"seed: {seed}")
+        await update.effective_message.reply_photo(photo=url, caption=f"seed: {seed}")
     except Exception:
         await update.effective_message.reply_text("Error. Incorrect number?")
+
 
 def main() -> None:
     application = (
@@ -240,9 +285,14 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("generate", generate, block=False))
+    application.add_handler(CommandHandler("gx", gx, block=False))
     application.add_handler(CommandHandler("waifu2x", waifu2x, block=False))
-    application.add_handler(CommandHandler("fursona", thisfursonadoesnotexist, block=False))
-    application.add_handler(CommandHandler("fursona_index", thisfursonadoesnotexist_index, block=False))
+    application.add_handler(
+        CommandHandler("fursona", thisfursonadoesnotexist, block=False)
+    )
+    application.add_handler(
+        CommandHandler("fursona_index", thisfursonadoesnotexist_index, block=False)
+    )
 
     application.run_polling()
 
