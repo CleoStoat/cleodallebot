@@ -55,7 +55,7 @@ async def gx(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "prompt": command_text,
         "aspect_ratio": 1,
         "num_inference_steps": 50,
-        "guidance_scale": 7.5,
+        "guidance_scale": 17.5,
     }
 
     try:
