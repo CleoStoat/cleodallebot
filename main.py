@@ -25,7 +25,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 DEEP_AI_API_KEY = os.getenv("DEEP_AI_API_KEY")
 # DEV_CHAT_ID = os.getenv("DEV_CHAT_ID")
 CRAIYON_ENDPOINT = "https://backend.craiyon.com/generate"
-MAGE_SPACE_API = "https://ai-api-3t3pkoefga-ue.a.run.app/api/v2/images/generate"
+MAGE_SPACE_API = "https://api.mage.space/api/v2/images/generate"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
